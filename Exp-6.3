@@ -1,0 +1,70 @@
+import java.util.*;
+import java.util.stream.Collectors;
+
+class Product {
+    String name;
+    String category;
+    double price;
+
+    Product(String name, String category, double price) {
+        this.name = name;
+        this.category = category;
+        this.price = price;
+    }
+}
+
+public class ProductStreamProcessing {
+    public static void main(String[] args) {
+        List<Product> products = Arrays.asList(
+            new Product("Laptop", "Electronics", 1200.0),
+            new Product("Smartphone", "Electronics", 800.0),
+            new Product("Headphones", "Electronics", 150.0),
+            new Product("Refrigerator", "Appliances", 1000.0),
+            new Product("Washing Machine", "Appliances", 700.0),
+            new Product("Microwave", "Appliances", 200.0),
+            new Product("Sofa", "Furniture", 500.0),
+            new Product("Table", "Furniture", 300.0)
+        );
+        Map<String, List<Product>> productsByCategory = products.stream()
+            .collect(Collectors.groupingBy(product -> product.category));
+        
+        System.out.println("Products grouped by category:");
+        productsByCategory.forEach((category, productList) -> {
+            System.out.println(category + ": " + productList.stream()
+                .map(product -> product.name)
+                .collect(Collectors.joining(", ")));
+        });
+        
+        
+        Map<String, Optional<Product>> mostExpensiveByCategory = products.stream()
+            .collect(Collectors.groupingBy(
+                product -> product.category,
+                Collectors.maxBy(Comparator.comparingDouble(product -> product.price))
+            ));
+        
+        System.out.println("\nMost expensive product in each category:");
+        mostExpensiveByCategory.forEach((category, product) -> 
+            System.out.println(category + ": " + product.map(p -> p.name + " ($" + p.price + ")").orElse("No products"))
+        );
+        
+
+        double averagePrice = products.stream()
+            .mapToDouble(product -> product.price)
+            .average()
+            .orElse(0.0);
+        
+        System.out.println("\nAverage price of all products: $" + averagePrice);
+    }
+}
+OUTPUT:
+Products grouped by category:
+Appliances: Refrigerator, Washing Machine, Microwave
+Electronics: Laptop, Smartphone, Headphones
+Furniture: Sofa, Table
+
+Most expensive product in each category:
+Appliances: Refrigerator ($1000.0)
+Electronics: Laptop ($1200.0)
+Furniture: Sofa ($500.0)
+
+Average price of all products: $606.25
